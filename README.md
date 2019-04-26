@@ -1,5 +1,12 @@
 ## react-tailwind-starter
 
+A basic solitaire clone.
+
+- Todo
+- [ ] Implement using the stock
+- [ ] Implement drag and drop
+- [ ] Implement win condition
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), and has [tailwindcss](https://tailwindcss.com) wired up.
 
 ## Available Scripts
