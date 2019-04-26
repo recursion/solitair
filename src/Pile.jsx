@@ -8,7 +8,13 @@ const getUID = () => uid++;
 
 // represents a pile of cards
 // cards will be stacked on top of each other
-const Pile = ({ cards, cardClickHandler, pileClickHandler, selected }) => (
+const Pile = ({
+  cards,
+  cardClickHandler,
+  pileClickHandler,
+  selected,
+  offset
+}) => (
   <div
     className="border-white border-2 rounded w-32 h-48 relative"
     onClick={cards.length === 0 ? pileClickHandler : () => {}}
@@ -21,7 +27,7 @@ const Pile = ({ cards, cardClickHandler, pileClickHandler, selected }) => (
           <Card
             card={card}
             clickHandler={cardClickHandler}
-            offset={i * stackOffset}
+            offset={offset ? i * stackOffset : 0}
             key={getUID()}
             selected={selected}
           />
