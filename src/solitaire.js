@@ -96,11 +96,16 @@ export const moveToFoundation = (
   }
 
   // verify card is +1 value from previous card
+  const foundationHead = state.foundations[foundationIndex][0];
+  const currentCardIndexPlus = cards.indexOf(card.value) + 1;
+  const foundationHeadIndex = foundationHead
+    ? cards.indexOf(foundationHead.value)
+    : -1;
+
   if (
-    state.foundations[foundationIndex][0] &&
-    cards.indexOf(card.value) + 1 !==
-      cards.indexOf(state.foundations[foundationIndex][0].value) &&
-    card.suit !== state.foundations[foundationIndex][0].suit
+    foundationHead &&
+    (currentCardIndexPlus !== foundationHeadIndex ||
+      card.suit !== foundationHead.suit)
   ) {
     return state;
   }
