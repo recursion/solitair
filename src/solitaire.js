@@ -78,6 +78,53 @@ export const shuffle = deck => {
   return nextDeck;
 };
 
+// TODO: change to moveToFoundation AND
+// check for valid move
+// (if no cards, card must be ace
+// otherwise case must be 1 above previous)
+export const moveToEmptyFoundation = (
+  state,
+  card,
+  tableauIndex,
+  foundationIndex
+) => {
+  // make sure card is valid and foundation is empty
+  const nextTableau = state.tableaus[tableauIndex].slice();
+  if (card.value !== "A" || state.foundations[foundationIndex].length !== 0) {
+    return state;
+  }
+
+  // remove card from its tableau
+  let cardIndex;
+  nextTableau.forEach((c, i) => {
+    if (c.value === card.value && c.suit === card.suit) {
+      cardIndex = i;
+    }
+  });
+  const removed = nextTableau.splice(cardIndex, 1);
+  // turn the top card face up
+  if (nextTableau[0]) {
+    nextTableau[0].faceUp = true;
+  }
+
+  // add card to its foundation
+  const nextFoundation = state.foundations[foundationIndex].slice();
+  nextFoundation.push(removed);
+
+  const nextFoundations = [
+    ...state.foundations.slice(0, foundationIndex),
+    ...nextFoundation,
+    ...state.foundations.slice(foundationIndex + 1)
+  ];
+  const nextTableaus = [
+    ...state.tableaus.slice(0, tableauIndex),
+    nextTableau,
+    ...state.tableaus.slice(tableauIndex + 1)
+  ];
+
+  return { ...state, tableaus: nextTableaus, foundations: nextFoundations };
+};
+
 // check if a move is allowed
 // we could just return a true, and then update the deck and tableau?
 // likely this will be moving one card from a tableau to a new tableau

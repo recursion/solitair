@@ -46,7 +46,7 @@ const selectNew = (state, action) => {
     pileIndex: action.pileIndex
   };
   let nextFoundations = state.game.foundations;
-  let nextTableaus = state.game.nextTableaus;
+  let nextTableaus = state.game.tableaus;
 
   if (action.pileType === "FOUNDATION") {
     nextFoundations = highlightCard(state, action, "foundations", true);
@@ -73,6 +73,7 @@ const moveCard = (state, action) => {
 
   if (action.pileType === "FOUNDATION") {
     nextFoundations = unHighlightCard(state, action, "foundations");
+    // TODO: handle moving from a foundation
   } else if (action.pileType === "TABLEAU") {
     nextTableaus = unHighlightCard(state, action, "tableaus");
     nextTableaus = Solitaire.moveToTableau(
@@ -93,6 +94,23 @@ const moveCard = (state, action) => {
   };
 };
 
+const moveToEmptyFoundation = (state, action) => {
+  let nextTableaus = unHighlightCard(state, action, "tableaus");
+
+  const nextGameState = Solitaire.moveToEmptyFoundation(
+    { ...state.game, tableaus: nextTableaus },
+    state.selected.card,
+    state.selected.pileIndex,
+    action.pileIndex
+  );
+  debugger;
+  return {
+    ...state,
+    game: nextGameState,
+    selected: initialGameState.selected
+  };
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case "SELECT":
@@ -102,6 +120,15 @@ const reducer = (state, action) => {
         return moveCard(state, action);
       }
       return selectNew(state, action);
+
+    case "MOVE_TO_FOUNDATION":
+      if (state.selected.card) {
+        return moveToEmptyFoundation(state, action);
+      }
+      return state;
+
+    case "MOVE_TO_TABLEAU":
+      return state;
 
     default:
       return state;
@@ -121,6 +148,7 @@ const init = state => {
 };
 
 const dispatchSelectFoundation = (dispatch, card, pileIndex) => {
+  console.log("OMG");
   return dispatch({
     type: "SELECT",
     pileType: "FOUNDATION",
@@ -137,6 +165,21 @@ const dispatchSelectTableau = (dispatch, card, pileIndex) => {
     card
   });
 };
+
+const dispatchSelectEmptyFoundation = (dispatch, pileIndex) => {
+  console.log("WHY");
+  dispatch({ type: "MOVE_TO_FOUNDATION", pileIndex });
+};
+
+const dispatchSelectEmptyTableau = (dispatch, pileIndex) => {
+  dispatch({ type: "MOVE_TO_TABLEAU", pileIndex });
+};
+
+let uid = 0;
+const getUID = () => {
+  return uid++;
+};
+
 // represents the solitaire table
 // a table has:
 // a stock (the "hand")
@@ -147,31 +190,39 @@ const Table = () => {
   const [state, dispatch] = useReducer(reducer, initialGameState, init);
 
   return (
-    <div className="bg-green-light w-screen h-screen flex flex-col items-stretch justify-between p-1">
+    <div className="bg-green-light w-screen h-screen flex flex-col items-stretch justify-start p-2">
       <div className="flex flex-row justify-end">
-        <div className="flex-grow" />
+        <div className="flex-grow">
+          <Pile cards={state.game.stock} />
+        </div>
         <div className="flex-grow" />
         <div className="flex-grow" />
         <div className="flex-grow flex flex-row justify-around">
           {state.game.foundations.map((f, i) => (
             <Pile
               cards={state.game.foundations[i]}
-              clickHandler={card => dispatchSelectFoundation(dispatch, card, i)}
+              key={getUID()}
+              cardClickHandler={card =>
+                dispatchSelectFoundation(dispatch, card, i)
+              }
+              pileClickHandler={() => {
+                dispatchSelectEmptyFoundation(dispatch, i);
+              }}
             />
           ))}
         </div>
       </div>
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-row items-start justify-around mt-5">
         {state.game.tableaus.map((t, i) => (
           <Pile
             cards={state.game.tableaus[i]}
-            clickHandler={card => dispatchSelectTableau(dispatch, card, i)}
+            key={getUID()}
+            cardClickHandler={card => dispatchSelectTableau(dispatch, card, i)}
+            pileClickHandler={() => {
+              dispatchSelectEmptyTableau(dispatch, i);
+            }}
           />
         ))}
-      </div>
-      <div className="flex flex-row justify-around">
-        <Pile cards={state.game.stock} />
-        <Pile cards={state.game.waste} />
       </div>
     </div>
   );
