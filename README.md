@@ -3,6 +3,7 @@
 A basic solitaire clone.
 
 - Todo
+- [x] Fix piles re-rendering on every state change
 - [ ] Implement using the stock
 - [ ] Implement drag and drop
 - [ ] Implement win condition
