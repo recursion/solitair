@@ -3,10 +3,13 @@
 A basic solitaire clone.
 
 - Todo
-- [ ] Fix piles re-rendering on every state change ( this seemed to be working for a bit - but no longer is)
 - [ ] Implement using the stock
 - [ ] Implement drag and drop
 - [ ] Implement win condition
+- [x] Fix piles re-rendering on every state change
+      -- Had some odd issues where this seemed like it wasnt working
+      -- but appears to be ok in chrome and firefox now.
+      -- will continue to watch.
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), and has [tailwindcss](https://tailwindcss.com) wired up.
 
