@@ -56,7 +56,7 @@ export const Deck = () => {
   const deck = [];
   for (let suit of suits) {
     for (let value of cards) {
-      deck.push({ value, suit, faceUp: false, selected: false });
+      deck.push({ value, suit, faceUp: false });
     }
   }
   return deck;

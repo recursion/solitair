@@ -2,41 +2,6 @@ import React, { useReducer } from "react";
 import Pile from "./Pile";
 import * as Solitaire from "./solitaire";
 
-const unHighlightCard = (state, action, pileGroup) => {
-  let nextPile = state.game[pileGroup][state.selected.pileIndex];
-  nextPile = nextPile.map(card => {
-    if (
-      state.selected.card.value === card.value &&
-      state.selected.card.suit === card.suit
-    ) {
-      return { ...card, selected: false };
-    } else {
-      return card;
-    }
-  });
-  return [
-    ...state.game[pileGroup].slice(0, state.selected.pileIndex),
-    nextPile,
-    ...state.game[pileGroup].slice(state.selected.pileIndex + 1)
-  ];
-};
-
-const highlightCard = (state, action, pileGroup, selected = false) => {
-  let nextPile = state.game[pileGroup][action.pileIndex];
-  nextPile = nextPile.map(card => {
-    if (card.value === action.card.value && card.suit === action.card.suit) {
-      return { ...card, selected };
-    } else {
-      return card;
-    }
-  });
-  return [
-    ...state.game[pileGroup].slice(0, action.pileIndex),
-    nextPile,
-    ...state.game[pileGroup].slice(action.pileIndex + 1)
-  ];
-};
-
 // we have selected a new card for movement
 const selectNew = (state, action) => {
   const nextSelected = {
@@ -45,22 +10,9 @@ const selectNew = (state, action) => {
     pileType: action.pileType,
     pileIndex: action.pileIndex
   };
-  let nextFoundations = state.game.foundations;
-  let nextTableaus = state.game.tableaus;
-
-  if (action.pileType === "FOUNDATION") {
-    nextFoundations = highlightCard(state, action, "foundations", true);
-  } else if (action.pileType === "TABLEAU") {
-    nextTableaus = highlightCard(state, action, "tableaus", true);
-  }
 
   return {
     ...state,
-    game: {
-      ...state.game,
-      foundations: nextFoundations,
-      tableaus: nextTableaus
-    },
     selected: nextSelected
   };
 };
@@ -72,10 +24,8 @@ const moveCard = (state, action) => {
   let nextTableaus = [...state.game.tableaus];
 
   if (action.pileType === "FOUNDATION") {
-    nextFoundations = unHighlightCard(state, action, "foundations");
     // TODO: handle moving from a foundation
   } else if (action.pileType === "TABLEAU") {
-    nextTableaus = unHighlightCard(state, action, "tableaus");
     nextTableaus = Solitaire.moveToTableau(
       nextTableaus,
       state.selected.pileIndex,
@@ -95,10 +45,8 @@ const moveCard = (state, action) => {
 };
 
 const moveToEmptyFoundation = (state, action) => {
-  let nextTableaus = unHighlightCard(state, action, "tableaus");
-
   const nextGameState = Solitaire.moveToEmptyFoundation(
-    { ...state.game, tableaus: nextTableaus },
+    state.game,
     state.selected.card,
     state.selected.pileIndex,
     action.pileIndex
@@ -193,7 +141,14 @@ const Table = () => {
     <div className="bg-green-light w-screen h-screen flex flex-col items-stretch justify-start p-2">
       <div className="flex flex-row justify-end">
         <div className="flex-grow">
-          <Pile cards={state.game.stock} />
+          <Pile
+            cards={state.game.stock}
+            selected={state.selected.card}
+            cardClickHandler={card => {
+              console.log("Handle click stock.");
+              console.log(card);
+            }}
+          />
         </div>
         <div className="flex-grow" />
         <div className="flex-grow" />
@@ -208,6 +163,7 @@ const Table = () => {
               pileClickHandler={() => {
                 dispatchSelectEmptyFoundation(dispatch, i);
               }}
+              selected={state.selected.card}
             />
           ))}
         </div>
@@ -221,6 +177,7 @@ const Table = () => {
             pileClickHandler={() => {
               dispatchSelectEmptyTableau(dispatch, i);
             }}
+            selected={state.selected.card}
           />
         ))}
       </div>

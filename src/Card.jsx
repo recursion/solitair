@@ -3,10 +3,10 @@ import { images } from "./images.js";
 
 // represents a card
 // can be face up or face down
-const Card = ({ card, clickHandler, offset }) => {
+const Card = ({ card, clickHandler, offset, selected }) => {
   if (!card) return <div />;
   const className =
-    card && card.selected
+    selected && (card.value === selected.value && card.suit === selected.suit)
       ? `border-4 border-blue rounded absolute}`
       : `absolute`;
   if (card.faceUp) {
