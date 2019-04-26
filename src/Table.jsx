@@ -20,38 +20,23 @@ const selectNew = (state, action) => {
 // we already have a card selected, and now have clicked on the location we want to place it
 // determine if the move is legal and move it, or fail.
 const moveCard = (state, action) => {
-  let nextFoundations = [...state.game.foundations];
-  let nextTableaus = [...state.game.tableaus];
-
+  let nextGameState;
   if (action.pileType === "FOUNDATION") {
     // TODO: handle moving from a foundation
+    nextGameState = Solitaire.moveToFoundation(
+      state.game,
+      state.selected.card,
+      state.selected.pileIndex,
+      action.pileIndex
+    );
   } else if (action.pileType === "TABLEAU") {
-    nextTableaus = Solitaire.moveToTableau(
-      nextTableaus,
+    nextGameState = Solitaire.moveToTableau(
+      state.game,
       state.selected.pileIndex,
       action.pileIndex,
       state.selected.card
     );
   }
-  return {
-    ...state,
-    game: {
-      ...state.game,
-      foundations: nextFoundations,
-      tableaus: nextTableaus
-    },
-    selected: initialGameState.selected
-  };
-};
-
-const moveToEmptyFoundation = (state, action) => {
-  const nextGameState = Solitaire.moveToEmptyFoundation(
-    state.game,
-    state.selected.card,
-    state.selected.pileIndex,
-    action.pileIndex
-  );
-  debugger;
   return {
     ...state,
     game: nextGameState,
@@ -71,11 +56,14 @@ const reducer = (state, action) => {
 
     case "MOVE_TO_FOUNDATION":
       if (state.selected.card) {
-        return moveToEmptyFoundation(state, action);
+        return moveCard(state, action);
       }
       return state;
 
     case "MOVE_TO_TABLEAU":
+      if (state.selected.card) {
+        return moveCard(state, action);
+      }
       return state;
 
     default:
@@ -96,7 +84,6 @@ const init = state => {
 };
 
 const dispatchSelectFoundation = (dispatch, card, pileIndex) => {
-  console.log("OMG");
   return dispatch({
     type: "SELECT",
     pileType: "FOUNDATION",
@@ -115,12 +102,11 @@ const dispatchSelectTableau = (dispatch, card, pileIndex) => {
 };
 
 const dispatchSelectEmptyFoundation = (dispatch, pileIndex) => {
-  console.log("WHY");
-  dispatch({ type: "MOVE_TO_FOUNDATION", pileIndex });
+  dispatch({ type: "MOVE_TO_FOUNDATION", pileIndex, pileType: "FOUNDATION" });
 };
 
 const dispatchSelectEmptyTableau = (dispatch, pileIndex) => {
-  dispatch({ type: "MOVE_TO_TABLEAU", pileIndex });
+  dispatch({ type: "MOVE_TO_TABLEAU", pileIndex, pileType: "TABLEAU" });
 };
 
 let uid = 0;
@@ -144,6 +130,7 @@ const Table = () => {
           <Pile
             cards={state.game.stock}
             selected={state.selected.card}
+            offSet={false}
             cardClickHandler={card => {
               console.log("Handle click stock.");
               console.log(card);
@@ -157,6 +144,7 @@ const Table = () => {
             <Pile
               cards={state.game.foundations[i]}
               key={getUID()}
+              offSet={false}
               cardClickHandler={card =>
                 dispatchSelectFoundation(dispatch, card, i)
               }
@@ -171,6 +159,7 @@ const Table = () => {
       <div className="flex flex-row items-start justify-around mt-5">
         {state.game.tableaus.map((t, i) => (
           <Pile
+            offset={true}
             cards={state.game.tableaus[i]}
             key={getUID()}
             cardClickHandler={card => dispatchSelectTableau(dispatch, card, i)}

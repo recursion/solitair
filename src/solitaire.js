@@ -82,15 +82,26 @@ export const shuffle = deck => {
 // check for valid move
 // (if no cards, card must be ace
 // otherwise case must be 1 above previous)
-export const moveToEmptyFoundation = (
+export const moveToFoundation = (
   state,
   card,
   tableauIndex,
   foundationIndex
 ) => {
-  // make sure card is valid and foundation is empty
   const nextTableau = state.tableaus[tableauIndex].slice();
-  if (card.value !== "A" || state.foundations[foundationIndex].length !== 0) {
+
+  // if foundation is empty, make sure card is an ace
+  if (state.foundations[foundationIndex].length === 0 && card.value !== "A") {
+    return state;
+  }
+
+  // verify card is +1 value from previous card
+  if (
+    state.foundations[foundationIndex][0] &&
+    cards.indexOf(card.value) + 1 !==
+      cards.indexOf(state.foundations[foundationIndex][0].value) &&
+    card.suit !== state.foundations[foundationIndex][0].suit
+  ) {
     return state;
   }
 
@@ -101,7 +112,7 @@ export const moveToEmptyFoundation = (
       cardIndex = i;
     }
   });
-  const removed = nextTableau.splice(cardIndex, 1);
+  const [removed] = nextTableau.splice(cardIndex, 1);
   // turn the top card face up
   if (nextTableau[0]) {
     nextTableau[0].faceUp = true;
@@ -109,13 +120,11 @@ export const moveToEmptyFoundation = (
 
   // add card to its foundation
   const nextFoundation = state.foundations[foundationIndex].slice();
-  nextFoundation.push(removed);
+  nextFoundation.unshift(removed);
 
-  const nextFoundations = [
-    ...state.foundations.slice(0, foundationIndex),
-    ...nextFoundation,
-    ...state.foundations.slice(foundationIndex + 1)
-  ];
+  const nextFoundations = state.foundations.slice();
+  nextFoundations[foundationIndex] = nextFoundation;
+
   const nextTableaus = [
     ...state.tableaus.slice(0, tableauIndex),
     nextTableau,
@@ -125,54 +134,64 @@ export const moveToEmptyFoundation = (
   return { ...state, tableaus: nextTableaus, foundations: nextFoundations };
 };
 
+// moves a card from one tableau to another
+const tableauSwap = (state, indexFrom, indexTo, card) => {
+  const tableauFrom = state.tableaus[indexFrom].slice();
+  const tableauTo = state.tableaus[indexTo].slice();
+  let nextTableaus = state.tableaus.slice();
+  let toCardIndex;
+
+  // remove the card from existing pile
+  tableauFrom.forEach((c, i) => {
+    if (c.value === card.value && c.suit === card.suit) {
+      toCardIndex = i;
+    }
+  });
+  const removedCards = tableauFrom.splice(0, toCardIndex + 1);
+
+  // turn the top card face up
+  if (tableauFrom[0]) {
+    tableauFrom[0].faceUp = true;
+  }
+
+  // add the card to the new pile
+  for (let card of removedCards.reverse()) {
+    tableauTo.unshift(card);
+  }
+
+  nextTableaus[indexFrom] = tableauFrom;
+  nextTableaus[indexTo] = tableauTo;
+  return nextTableaus;
+};
+
 // check if a move is allowed
 // we could just return a true, and then update the deck and tableau?
 // likely this will be moving one card from a tableau to a new tableau
 // so we could just pass two tableaus, and verify the move,
 // then returning the updated tableaus
-export const moveToTableau = (tableaus, indexFrom, indexTo, card) => {
-  const toCard = tableaus[indexTo][0];
-  const cardIndex = cards.indexOf(toCard.value);
-  let nextTableaus = tableaus.slice();
-  let nextTo, nextFrom;
+export const moveToTableau = (state, indexFrom, indexTo, card) => {
+  const tableauTo = state.tableaus[indexTo];
 
-  // can't place below lowest card (an ace)
-  if (cardIndex === 0) return tableaus;
+  // if the tableau is empty, we can only move kings here
+  if (tableauTo.length === 0 && card.value === "K") {
+    return { ...state, tableaus: tableauSwap(state, indexFrom, indexTo, card) };
+  } else {
+    const toCard = state.tableaus[indexTo][0];
+    const fromCardIndex = cards.indexOf(toCard.value);
 
-  // if the value of our card is 1 level below the card we are moving to
-  if (cards[cardIndex - 1] === card.value) {
-    // allow the move
-    // remove the card from the existing pile
-    const tableauFrom = tableaus[indexFrom];
-    let cIndex;
-    tableauFrom.forEach((c, i) => {
-      if (c.value === card.value && c.suit === card.suit) {
-        cIndex = i;
-      }
-    });
-    nextFrom = [...tableauFrom];
-    const removedCards = nextFrom.splice(0, cIndex + 1);
-    // turn the top card face up
-    if (nextFrom[0]) {
-      nextFrom[0].faceUp = true;
+    // can't place below lowest card (an ace)
+    if (fromCardIndex === 0) return state;
+
+    // if the value of our card is 1 level below the card we are moving to
+    if (cards[fromCardIndex - 1] === card.value) {
+      return {
+        ...state,
+        tableaus: tableauSwap(state, indexFrom, indexTo, card)
+      };
     }
-
-    // add the card to the new pile
-    const tableauTo = tableaus[indexTo];
-    nextTo = [...tableauTo];
-    for (let card of removedCards.reverse()) {
-      nextTo.unshift(card);
-    }
-
-    nextTableaus[indexFrom] = nextFrom;
-    nextTableaus[indexTo] = nextTo;
   }
-  return nextTableaus;
+  return state;
 };
-
-// likely need to pass all foundations so we can check for a win?
-// or any function that calls this can just call check for win on successful move?
-export const moveToFoundation = (tableau, foundation) => {};
 
 // const checkForWin = foundations => {};
 
