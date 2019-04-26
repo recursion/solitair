@@ -44,44 +44,56 @@ const moveCard = (state, action) => {
   };
 };
 
+// use has clicked on the stock pile
+// deal out 3 cards (into the waste pile)
+// any cards in the waste pile will be added to the bottom of the stock pile
+const dealStockCards = (state, action) => {
+  const stock = state.game.stock.slice();
+  const waste = state.game.waste.slice();
+  let nextWaste;
+
+  // if there are already visible dealt cards..
+  if (state.game.waste.length > 0) {
+    // then those need to be moved to the bottom of the stop
+    const wasteCards = waste.splice(0, 3);
+    wasteCards.forEach(card => {
+      card.faceUp = false;
+      stock.push(card);
+    });
+    nextWaste = [];
+  }
+
+  // remove cards from top of stock
+  const dealtCards = stock.splice(0, 3);
+  dealtCards.forEach(card => {
+    card.faceUp = true;
+  });
+
+  // put cards into wastepile (misnamed for now)
+  nextWaste = dealtCards;
+
+  return {
+    ...state,
+    game: { ...state.game, stock, waste: nextWaste }
+  };
+};
+
 const reducer = (state, action) => {
   switch (action.type) {
     case "DEAL":
-      const stock = state.game.stock.slice();
-      const waste = state.game.waste.slice();
-      let nextWaste;
+      return dealStockCards(state, action);
 
-      // if there are already visible dealt cards..
-      if (state.game.waste.length > 0) {
-        // then those need to be moved to the bottom of the stop
-        const wasteCards = waste.splice(0, 3);
-        wasteCards.forEach(card => {
-          stock.push(card);
-        });
-        nextWaste = [];
-      }
-
-      // remove cards from top of stock
-      const dealtCards = stock.splice(0, 3);
-      dealtCards.forEach(card => {
-        card.faceUp = true;
-      });
-
-      // put cards into wastepile (misnamed for now)
-      nextWaste = dealtCards;
-
-      return {
-        ...state,
-        game: { ...state.game, stock, waste: nextWaste }
-      };
+    case "USE_STOCK_CARD":
+      return state;
 
     case "SELECT":
-      // TODO: if this was a click on the "stock" then deal cards
-      // or if the "wastepile" do nothing (wastepile should be removed / treated as the bottom of the stock)
-      if (state.selected.card) {
+      if (state.selected.card && state.selected.pileType !== "STOCK") {
         return moveCard(state, action);
+      } else if (!state.selected.card) {
+        return selectNew(state, action);
+      } else {
+        return { ...state, selected: initialGameState.selected };
       }
-      return selectNew(state, action);
 
     case "MOVE_TO_FOUNDATION":
       if (state.selected.card) {
@@ -130,6 +142,15 @@ const dispatchSelectTableau = (dispatch, card, pileIndex) => {
   });
 };
 
+const dispatchSelectStockCard = (dispatch, card) => {
+  dispatch({
+    type: "SELECT",
+    pileType: "STOCK",
+    pileIndex: 0,
+    card
+  });
+};
+
 const dispatchSelectEmptyFoundation = (dispatch, pileIndex) => {
   dispatch({ type: "MOVE_TO_FOUNDATION", pileIndex, pileType: "FOUNDATION" });
 };
@@ -169,12 +190,16 @@ const Table = () => {
             }}
           />
         </div>
-        <div className="flex-grow flex flex-row">
+        <div className="flex-grow flex flex-row justify-around">
           <Pile
             cards={state.game.waste}
             selected={state.selected.card}
             offSet={false}
-            cardClickHandler={card => {}}
+            cardClickHandler={card => {
+              console.log(state.selected);
+              console.log(card);
+              dispatchSelectStockCard(dispatch, card);
+            }}
           />
         </div>
         <div className="flex-grow" />
