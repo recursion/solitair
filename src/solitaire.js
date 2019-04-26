@@ -174,7 +174,7 @@ export const moveToTableau = (tableaus, indexFrom, indexTo, card) => {
 // or any function that calls this can just call check for win on successful move?
 export const moveToFoundation = (tableau, foundation) => {};
 
-const checkForWin = foundations => {};
+// const checkForWin = foundations => {};
 
 // Rules
 
