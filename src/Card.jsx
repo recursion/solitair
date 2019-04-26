@@ -15,7 +15,7 @@ const Card = ({ card, clickHandler, offset, selected }) => {
     return (
       <img
         src={images[card.value + card.suit + ".png"]}
-        alt={card.value}
+        alt={`${card.value}${card.suit}`}
         onClick={() => clickHandler(card)}
         className={className}
         style={{ top: offset }}
