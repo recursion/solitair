@@ -46,6 +46,35 @@ const moveCard = (state, action) => {
 
 const reducer = (state, action) => {
   switch (action.type) {
+    case "DEAL":
+      const stock = state.game.stock.slice();
+      const waste = state.game.waste.slice();
+      let nextWaste;
+
+      // if there are already visible dealt cards..
+      if (state.game.waste.length > 0) {
+        // then those need to be moved to the bottom of the stop
+        const wasteCards = waste.splice(0, 3);
+        wasteCards.forEach(card => {
+          stock.push(card);
+        });
+        nextWaste = [];
+      }
+
+      // remove cards from top of stock
+      const dealtCards = stock.splice(0, 3);
+      dealtCards.forEach(card => {
+        card.faceUp = true;
+      });
+
+      // put cards into wastepile (misnamed for now)
+      nextWaste = dealtCards;
+
+      return {
+        ...state,
+        game: { ...state.game, stock, waste: nextWaste }
+      };
+
     case "SELECT":
       // TODO: if this was a click on the "stock" then deal cards
       // or if the "wastepile" do nothing (wastepile should be removed / treated as the bottom of the stock)
@@ -109,6 +138,10 @@ const dispatchSelectEmptyTableau = (dispatch, pileIndex) => {
   dispatch({ type: "MOVE_TO_TABLEAU", pileIndex, pileType: "TABLEAU" });
 };
 
+const dispatchDeal = dispatch => {
+  dispatch({ type: "DEAL" });
+};
+
 let uid = 0;
 const getUID = () => {
   return uid++;
@@ -132,12 +165,18 @@ const Table = () => {
             selected={state.selected.card}
             offSet={false}
             cardClickHandler={card => {
-              console.log("Handle click stock.");
-              console.log(card);
+              dispatchDeal(dispatch);
             }}
           />
         </div>
-        <div className="flex-grow" />
+        <div className="flex-grow flex flex-row">
+          <Pile
+            cards={state.game.waste}
+            selected={state.selected.card}
+            offSet={false}
+            cardClickHandler={card => {}}
+          />
+        </div>
         <div className="flex-grow" />
         <div className="flex-grow flex flex-row justify-around">
           {state.game.foundations.map((f, i) => (
