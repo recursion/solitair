@@ -25,16 +25,14 @@ const moveCard = (state, action) => {
     // TODO: handle moving from a foundation
     nextGameState = Solitaire.moveToFoundation(
       state.game,
-      state.selected.card,
-      state.selected.pileIndex,
+      state.selected,
       action.pileIndex
     );
   } else if (action.pileType === "TABLEAU") {
     nextGameState = Solitaire.moveToTableau(
       state.game,
-      state.selected.pileIndex,
-      action.pileIndex,
-      state.selected.card
+      state.selected,
+      action.pileIndex
     );
   }
   return {
@@ -44,44 +42,11 @@ const moveCard = (state, action) => {
   };
 };
 
-// use has clicked on the stock pile
-// deal out 3 cards (into the waste pile)
-// any cards in the waste pile will be added to the bottom of the stock pile
-const dealStockCards = (state, action) => {
-  const stock = state.game.stock.slice();
-  const waste = state.game.waste.slice();
-  let nextWaste;
-
-  // if there are already visible dealt cards..
-  if (state.game.waste.length > 0) {
-    // then those need to be moved to the bottom of the stop
-    const wasteCards = waste.splice(0, 3);
-    wasteCards.forEach(card => {
-      card.faceUp = false;
-      stock.push(card);
-    });
-    nextWaste = [];
-  }
-
-  // remove cards from top of stock
-  const dealtCards = stock.splice(0, 3);
-  dealtCards.forEach(card => {
-    card.faceUp = true;
-  });
-
-  // put cards into wastepile (misnamed for now)
-  nextWaste = dealtCards;
-
-  return {
-    ...state,
-    game: { ...state.game, stock, waste: nextWaste }
-  };
-};
-
 const reducer = (state, action) => {
   switch (action.type) {
     case "DEAL":
-      return dealStockCards(state, action);
+      const nextGameState = Solitaire.dealStockCards(state.game);
+      return { ...state, game: nextGameState };
 
     case "USE_STOCK_CARD":
       return state;
@@ -95,13 +60,7 @@ const reducer = (state, action) => {
         return { ...state, selected: initialGameState.selected };
       }
 
-    case "MOVE_TO_FOUNDATION":
-      if (state.selected.card) {
-        return moveCard(state, action);
-      }
-      return state;
-
-    case "MOVE_TO_TABLEAU":
+    case "MOVE":
       if (state.selected.card) {
         return moveCard(state, action);
       }
@@ -152,11 +111,11 @@ const dispatchSelectStockCard = (dispatch, card) => {
 };
 
 const dispatchSelectEmptyFoundation = (dispatch, pileIndex) => {
-  dispatch({ type: "MOVE_TO_FOUNDATION", pileIndex, pileType: "FOUNDATION" });
+  dispatch({ type: "MOVE", pileIndex, pileType: "FOUNDATION" });
 };
 
 const dispatchSelectEmptyTableau = (dispatch, pileIndex) => {
-  dispatch({ type: "MOVE_TO_TABLEAU", pileIndex, pileType: "TABLEAU" });
+  dispatch({ type: "MOVE", pileIndex, pileType: "TABLEAU" });
 };
 
 const dispatchDeal = dispatch => {
