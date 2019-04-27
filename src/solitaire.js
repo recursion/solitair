@@ -22,7 +22,8 @@ export const initialState = {
   stock: [],
   foundations: [[], [], [], []],
   tableaus: [[], [], [], [], [], [], []],
-  waste: []
+  waste: [],
+  winner: false
 };
 
 export const init = state => {
@@ -122,6 +123,94 @@ const getCardIndex = (card, pile) => {
   });
   return cardIndex;
 };
+const checkForWinner = foundations => {
+  let win = true;
+  foundations.forEach(pile => {
+    if (pile[0] && pile[0].value !== "K") {
+      win = false;
+    }
+  });
+  return win;
+};
+
+const tableauToFoundation = (
+  state,
+  nextTableau,
+  foundationIndex,
+  tableauIndex,
+  card
+) => {
+  // remove card from its tableau
+  let cardIndex = getCardIndex(card, nextTableau);
+  const [removed] = nextTableau.splice(cardIndex, 1);
+
+  // turn the top card face up
+  if (nextTableau[0]) {
+    nextTableau[0].faceUp = true;
+  }
+
+  const nextFoundations = addCardToFoundation(
+    removed,
+    state.foundations,
+    foundationIndex
+  );
+
+  const nextTableaus = [
+    ...state.tableaus.slice(0, tableauIndex),
+    nextTableau,
+    ...state.tableaus.slice(tableauIndex + 1)
+  ];
+
+  return {
+    ...state,
+    tableaus: nextTableaus,
+    foundations: nextFoundations,
+    winner: checkForWinner(nextFoundations)
+  };
+};
+
+// move a card from stock to foundation
+const stockToFoundation = (state, foundationIndex) => {
+  const waste = state.waste.slice();
+
+  // remove the card from existing pile
+  const [moveCard] = waste.reverse().splice(0, 1);
+
+  // add card to its foundation
+  const nextFoundations = addCardToFoundation(
+    moveCard,
+    state.foundations,
+    foundationIndex
+  );
+
+  return {
+    ...state,
+    waste: waste.reverse(),
+    foundations: nextFoundations,
+    winner: checkForWinner(nextFoundations)
+  };
+};
+
+// verify that a move to a foundation is valid
+const validFoundationMove = (foundationTarget, card) => {
+  const foundationHead = foundationTarget[0];
+  const currentCardIndexMinus = cards.indexOf(card.value) - 1;
+  const foundationHeadIndex = foundationHead
+    ? cards.indexOf(foundationHead.value)
+    : -1;
+
+  // if foundation is empty, make sure card is an ace
+  if (foundationTarget.length === 0 && card.value === "A") {
+    return true;
+  }
+
+  // verify card is -1 value from card at top of foundation
+  return (
+    foundationHead &&
+    (currentCardIndexMinus === foundationHeadIndex ||
+      card.suit === foundationHead.suit)
+  );
+};
 
 // try to move a card to a foundation pile
 export const moveToFoundation = (state, selected, foundationIndex) => {
@@ -130,64 +219,20 @@ export const moveToFoundation = (state, selected, foundationIndex) => {
   const foundationTarget = state.foundations[foundationIndex];
   const card = selected.card;
 
-  // if foundation is empty, make sure card is an ace
-  if (foundationTarget.length === 0 && card.value !== "A") {
-    return state;
-  }
-
-  // verify card is +1 value from previous card
-  const foundationHead = foundationTarget[0];
-  const currentCardIndexMinus = cards.indexOf(card.value) - 1;
-  const foundationHeadIndex = foundationHead
-    ? cards.indexOf(foundationHead.value)
-    : -1;
-
-  if (
-    foundationHead &&
-    (currentCardIndexMinus !== foundationHeadIndex ||
-      card.suit !== foundationHead.suit)
-  ) {
+  if (!validFoundationMove(foundationTarget, card)) {
     return state;
   }
 
   if (selected.pileType === "TABLEAU") {
-    // remove card from its tableau
-    let cardIndex = getCardIndex(card, nextTableau);
-    const [removed] = nextTableau.splice(cardIndex, 1);
-
-    // turn the top card face up
-    if (nextTableau[0]) {
-      nextTableau[0].faceUp = true;
-    }
-
-    // add card to its foundation
-    const nextFoundations = addCardToFoundation(
-      removed,
-      state.foundations,
-      foundationIndex
-    );
-
-    const nextTableaus = [
-      ...state.tableaus.slice(0, tableauIndex),
+    return tableauToFoundation(
+      state,
       nextTableau,
-      ...state.tableaus.slice(tableauIndex + 1)
-    ];
-
-    return { ...state, tableaus: nextTableaus, foundations: nextFoundations };
-  } else if (selected.pileType === "STOCK") {
-    const waste = state.waste.slice();
-
-    // remove the card from existing pile
-    const [moveCard] = waste.reverse().splice(0, 1);
-
-    // add card to its foundation
-    const nextFoundations = addCardToFoundation(
-      moveCard,
-      state.foundations,
-      foundationIndex
+      foundationIndex,
+      tableauIndex,
+      card
     );
-
-    return { ...state, waste: waste.reverse(), foundations: nextFoundations };
+  } else if (selected.pileType === "STOCK") {
+    return stockToFoundation(state, foundationIndex);
   } else {
     return state;
   }
