@@ -150,29 +150,48 @@ export const moveToFoundation = (state, selected, foundationIndex) => {
     return state;
   }
 
-  // remove card from its tableau
-  let cardIndex = getCardIndex(card, nextTableau);
-  const [removed] = nextTableau.splice(cardIndex, 1);
+  if (selected.pileType === "TABLEAU") {
+    // remove card from its tableau
+    let cardIndex = getCardIndex(card, nextTableau);
+    const [removed] = nextTableau.splice(cardIndex, 1);
 
-  // turn the top card face up
-  if (nextTableau[0]) {
-    nextTableau[0].faceUp = true;
+    // turn the top card face up
+    if (nextTableau[0]) {
+      nextTableau[0].faceUp = true;
+    }
+
+    // add card to its foundation
+    const nextFoundation = state.foundations[foundationIndex].slice();
+    nextFoundation.unshift(removed);
+
+    const nextFoundations = state.foundations.slice();
+    nextFoundations[foundationIndex] = nextFoundation;
+
+    const nextTableaus = [
+      ...state.tableaus.slice(0, tableauIndex),
+      nextTableau,
+      ...state.tableaus.slice(tableauIndex + 1)
+    ];
+
+    return { ...state, tableaus: nextTableaus, foundations: nextFoundations };
+  } else if (selected.pileType === "STOCK") {
+    // remove card from its pile
+    const waste = state.waste.slice();
+
+    // remove the card from existing pile
+    const [moveCard] = waste.reverse().splice(0, 1);
+
+    // add card to its foundation
+    const nextFoundation = state.foundations[foundationIndex].slice();
+    nextFoundation.unshift(moveCard);
+
+    const nextFoundations = state.foundations.slice();
+    nextFoundations[foundationIndex] = nextFoundation;
+
+    return { ...state, waste: waste.reverse(), foundations: nextFoundations };
+  } else {
+    return state;
   }
-
-  // add card to its foundation
-  const nextFoundation = state.foundations[foundationIndex].slice();
-  nextFoundation.unshift(removed);
-
-  const nextFoundations = state.foundations.slice();
-  nextFoundations[foundationIndex] = nextFoundation;
-
-  const nextTableaus = [
-    ...state.tableaus.slice(0, tableauIndex),
-    nextTableau,
-    ...state.tableaus.slice(tableauIndex + 1)
-  ];
-
-  return { ...state, tableaus: nextTableaus, foundations: nextFoundations };
 };
 
 // moves a card from one tableau to another
@@ -209,7 +228,11 @@ const moveFromStockToTableau = (state, indexTo) => {
   const [moveCard] = waste.reverse().splice(0, 1);
 
   const fromCardIndex = cards.indexOf(moveCard.value);
-  if (cards[fromCardIndex + 1] === tableauTo[0].value) {
+
+  if (
+    (tableauTo.length === 0 && moveCard.value === "K") ||
+    cards[fromCardIndex + 1] === tableauTo[0].value
+  ) {
     tableauTo.unshift(moveCard);
 
     nextTableaus[indexTo] = tableauTo;
