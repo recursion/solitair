@@ -6079,10 +6079,6 @@ table {
 
 /* Your custom CSS here */
 
-.facecard-offset {
-  top: 5px;
-}
-
 @media (min-width: 576px) {
   .sm\:list-reset {
     list-style: none;
