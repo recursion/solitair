@@ -47,7 +47,7 @@ const Pile = ({
           <Card
             card={card}
             clickHandler={cardClickHandler}
-            offset={offset ? i * stackOffset : 0}
+            offset={offset ? { top: `${i * stackOffset}px` } : null}
             key={getUID()}
             selected={selected}
           />
@@ -57,7 +57,6 @@ const Pile = ({
         card={cards[0] ? cards[0] : null}
         clickHandler={cardClickHandler}
         selected={selected}
-        offset={0}
       />
     )}
   </div>

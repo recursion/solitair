@@ -18,7 +18,7 @@ const Card = ({ card, clickHandler, offset, selected }) => {
         alt={`${card.value}${card.suit}`}
         onClick={() => clickHandler(card)}
         className={className}
-        style={{ top: offset }}
+        style={offset}
       />
     );
   } else {
