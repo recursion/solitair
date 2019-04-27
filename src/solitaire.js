@@ -161,11 +161,11 @@ export const moveToFoundation = (state, selected, foundationIndex) => {
     }
 
     // add card to its foundation
-    const nextFoundation = state.foundations[foundationIndex].slice();
-    nextFoundation.unshift(removed);
-
-    const nextFoundations = state.foundations.slice();
-    nextFoundations[foundationIndex] = nextFoundation;
+    const nextFoundations = addCardToFoundation(
+      removed,
+      state.foundations,
+      foundationIndex
+    );
 
     const nextTableaus = [
       ...state.tableaus.slice(0, tableauIndex),
@@ -175,23 +175,32 @@ export const moveToFoundation = (state, selected, foundationIndex) => {
 
     return { ...state, tableaus: nextTableaus, foundations: nextFoundations };
   } else if (selected.pileType === "STOCK") {
-    // remove card from its pile
     const waste = state.waste.slice();
 
     // remove the card from existing pile
     const [moveCard] = waste.reverse().splice(0, 1);
 
     // add card to its foundation
-    const nextFoundation = state.foundations[foundationIndex].slice();
-    nextFoundation.unshift(moveCard);
-
-    const nextFoundations = state.foundations.slice();
-    nextFoundations[foundationIndex] = nextFoundation;
+    const nextFoundations = addCardToFoundation(
+      moveCard,
+      state.foundations,
+      foundationIndex
+    );
 
     return { ...state, waste: waste.reverse(), foundations: nextFoundations };
   } else {
     return state;
   }
+};
+
+const addCardToFoundation = (card, foundations, index) => {
+  // add card to its foundation
+  const nextFoundation = foundations[index].slice();
+  nextFoundation.unshift(card);
+
+  const nextFoundations = foundations.slice();
+  nextFoundations[index] = nextFoundation;
+  return nextFoundations;
 };
 
 // moves a card from one tableau to another
@@ -293,45 +302,3 @@ export const moveToTableau = (state, selected, indexTo) => {
   }
   return state;
 };
-
-// const checkForWin = foundations => {};
-
-// Rules
-
-// deck of cards 4 suits a-k where ace is the low card
-
-// the stock - your hand
-
-// stacks of cards - 7 stacks = the tableau
-
-// foundations = 4 piles on which a whole suit or sequence must be built up
-// generally the aces are the base of the foundation
-
-// the waste pile - cards from the stock pile that have no place in the tableau or the foundations
-
-// tableau formation: create seven piles from left to right
-// first card is placed face up
-// deal one card face down for next six piles
-// from left to right, 2nd pile gets 1 card face up
-// deal one card face down for next 5 piles
-// .... etc until final pile has a face up card.
-
-// remaining cards go in stock pile
-
-// when starting out the foundations and waste pile do not have any cards.
-
-// rules for stacking on foundations
-// start with ace
-// must be sequential and suited
-
-// rules for stacking on tableau
-// must be sequential
-// empty tableau can only take a king
-// alternate rule sets include requiring alternating colors on the tableau stack
-
-// possible components
-// foundation, tableau, waste, stock(hand), table
-
-// tables holds all other components, and checks rules when moves are made.
-
-// game rules file for applying/checking movements / returning new state
