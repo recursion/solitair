@@ -3,9 +3,12 @@
 A basic solitaire clone.
 
 - Todo
-- [ ] Implement using the stock
+- [x] Implement using the stock
+- [ ] Add ruleset for only allowing alternating colors on tableaus
+- [ ] Fix stock visible pile rendering when # of cards changes.
 - [ ] Implement drag and drop
-- [ ] Implement win condition
+- [x] Implement win condition - At least partially implemented
+- [ ] Display win condition
 - [x] Fix piles re-rendering on every state change
       -- Had some odd issues where this seemed like it wasnt working
       -- but appears to be ok in chrome and firefox now.
