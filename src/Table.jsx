@@ -1,6 +1,26 @@
 import React, { useReducer } from "react";
 import Pile from "./Pile";
+import Spread from "./Spread";
 import * as Solitaire from "./solitaire";
+
+const initialGameState = {
+  selected: { card: null, pileType: null, pileIndex: null },
+  game: Solitaire.initialState
+};
+
+const init = state => {
+  return {
+    selected: initialGameState.selected,
+    game: Solitaire.init(state.game)
+  };
+};
+
+// generate UIDs for component keys
+// TODO: something better
+let uid = 0;
+const getUID = () => {
+  return uid++;
+};
 
 // we have selected a new card for movement
 const selectNew = (state, action) => {
@@ -46,10 +66,11 @@ const reducer = (state, action) => {
   switch (action.type) {
     case "DEAL":
       const nextGameState = Solitaire.dealStockCards(state.game);
-      return { ...state, game: nextGameState };
-
-    case "USE_STOCK_CARD":
-      return state;
+      return {
+        ...state,
+        game: nextGameState,
+        selected: initialGameState.selected
+      };
 
     case "SELECT":
       if (state.selected.card && state.selected.pileType !== "STOCK") {
@@ -71,60 +92,21 @@ const reducer = (state, action) => {
   }
 };
 
-const initialGameState = {
-  selected: { card: null, pileType: null, pileIndex: null },
-  game: Solitaire.initialState
-};
-
-const init = state => {
-  return {
-    selected: initialGameState.selected,
-    game: Solitaire.init(state.game)
-  };
-};
-
-const dispatchSelectFoundation = (dispatch, card, pileIndex) => {
+const dispatchSelect = (dispatch, card, pileType, pileIndex) => {
   return dispatch({
     type: "SELECT",
-    pileType: "FOUNDATION",
+    pileType,
     pileIndex,
     card
   });
 };
 
-const dispatchSelectTableau = (dispatch, card, pileIndex) => {
-  return dispatch({
-    type: "SELECT",
-    pileType: "TABLEAU",
-    pileIndex,
-    card
-  });
-};
-
-const dispatchSelectStockCard = (dispatch, card) => {
-  dispatch({
-    type: "SELECT",
-    pileType: "STOCK",
-    pileIndex: 0,
-    card
-  });
-};
-
-const dispatchSelectEmptyFoundation = (dispatch, pileIndex) => {
-  dispatch({ type: "MOVE", pileIndex, pileType: "FOUNDATION" });
-};
-
-const dispatchSelectEmptyTableau = (dispatch, pileIndex) => {
-  dispatch({ type: "MOVE", pileIndex, pileType: "TABLEAU" });
+const dispatchSelectEmpty = (dispatch, pileIndex, pileType) => {
+  dispatch({ type: "MOVE", pileIndex, pileType });
 };
 
 const dispatchDeal = dispatch => {
   dispatch({ type: "DEAL" });
-};
-
-let uid = 0;
-const getUID = () => {
-  return uid++;
 };
 
 // represents the solitaire table
@@ -144,20 +126,17 @@ const Table = () => {
             cards={state.game.stock}
             selected={state.selected.card}
             offSet={false}
-            cardClickHandler={card => {
+            cardClickHandler={() => {
               dispatchDeal(dispatch);
             }}
           />
         </div>
         <div className="flex-grow flex flex-row justify-around">
-          <Pile
+          <Spread
             cards={state.game.waste}
             selected={state.selected.card}
-            offSet={false}
             cardClickHandler={card => {
-              console.log(state.selected);
-              console.log(card);
-              dispatchSelectStockCard(dispatch, card);
+              dispatchSelect(dispatch, card, "STOCK", 0);
             }}
           />
         </div>
@@ -169,10 +148,10 @@ const Table = () => {
               key={getUID()}
               offSet={false}
               cardClickHandler={card =>
-                dispatchSelectFoundation(dispatch, card, i)
+                dispatchSelect(dispatch, card, "FOUNDATION", i)
               }
               pileClickHandler={() => {
-                dispatchSelectEmptyFoundation(dispatch, i);
+                dispatchSelectEmpty(dispatch, i, "FOUNDATION");
               }}
               selected={state.selected.card}
             />
@@ -185,9 +164,11 @@ const Table = () => {
             offset={true}
             cards={state.game.tableaus[i]}
             key={getUID()}
-            cardClickHandler={card => dispatchSelectTableau(dispatch, card, i)}
+            cardClickHandler={card =>
+              dispatchSelect(dispatch, card, "TABLEAU", i)
+            }
             pileClickHandler={() => {
-              dispatchSelectEmptyTableau(dispatch, i);
+              dispatchSelectEmpty(dispatch, i, "TABLEAU");
             }}
             selected={state.selected.card}
           />
