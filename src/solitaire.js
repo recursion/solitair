@@ -123,10 +123,7 @@ const getCardIndex = (card, pile) => {
   return cardIndex;
 };
 
-// TODO: change to moveToFoundation AND
-// check for valid move
-// (if no cards, card must be ace
-// otherwise case must be 1 above previous)
+// try to move a card to a foundation pile
 export const moveToFoundation = (state, selected, foundationIndex) => {
   const tableauIndex = selected.pileIndex;
   const nextTableau = state.tableaus[tableauIndex].slice();
@@ -203,6 +200,33 @@ const tableauSwap = (state, indexFrom, indexTo, card) => {
   return nextTableaus;
 };
 
+const moveFromStockToTableau = (state, indexTo) => {
+  const waste = state.waste.slice();
+  const tableauTo = state.tableaus[indexTo].slice();
+  const nextTableaus = state.tableaus.slice();
+
+  // remove the card from existing pile
+  const [moveCard] = waste.reverse().splice(0, 1);
+
+  const fromCardIndex = cards.indexOf(moveCard.value);
+  if (cards[fromCardIndex + 1] === tableauTo[0].value) {
+    tableauTo.unshift(moveCard);
+
+    nextTableaus[indexTo] = tableauTo;
+    return {
+      ...state,
+      waste: waste.reverse(),
+      tableaus: nextTableaus
+    };
+  }
+
+  return {
+    ...state,
+    waste: state.waste,
+    tableaus: state.tableaus
+  };
+};
+
 // check if a move is allowed
 // we could just return a true, and then update the deck and tableau?
 // likely this will be moving one card from a tableau to a new tableau
@@ -215,8 +239,21 @@ export const moveToTableau = (state, selected, indexTo) => {
 
   // if the tableau is empty, we can only move kings here
   if (tableauTo.length === 0 && card.value === "K") {
-    return { ...state, tableaus: tableauSwap(state, indexFrom, indexTo, card) };
+    if (selected.pileType === "TABLEAU") {
+      return {
+        ...state,
+        tableaus: tableauSwap(state, indexFrom, indexTo, card)
+      };
+    } else {
+      // pileType is likely "STOCK"
+      // move from wastePile to tableau
+      return moveFromStockToTableau(state, indexTo);
+    }
   } else {
+    if (selected.pileType === "STOCK") {
+      return moveFromStockToTableau(state, indexTo);
+    }
+
     const toCard = state.tableaus[indexTo][0];
     const fromCardIndex = cards.indexOf(toCard.value);
 

@@ -40,9 +40,9 @@ const selectNew = (state, action) => {
 // we already have a card selected, and now have clicked on the location we want to place it
 // determine if the move is legal and move it, or fail.
 const moveCard = (state, action) => {
+  // TODO: handle moving from a foundation
   let nextGameState;
   if (action.pileType === "FOUNDATION") {
-    // TODO: handle moving from a foundation
     nextGameState = Solitaire.moveToFoundation(
       state.game,
       state.selected,
@@ -54,6 +54,12 @@ const moveCard = (state, action) => {
       state.selected,
       action.pileIndex
     );
+  } else {
+    // pileType is STOCK or something else we cant move to
+    return {
+      ...state,
+      selected: initialGameState.selected
+    };
   }
   return {
     ...state,
@@ -73,7 +79,7 @@ const reducer = (state, action) => {
       };
 
     case "SELECT":
-      if (state.selected.card && state.selected.pileType !== "STOCK") {
+      if (state.selected.card) {
         return moveCard(state, action);
       } else if (!state.selected.card) {
         return selectNew(state, action);
