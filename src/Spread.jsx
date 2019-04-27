@@ -19,7 +19,8 @@ const areEqual = (prev, next) => {
     next.cards[0] &&
     prev.cards[0].suit === next.cards[0].suit &&
     prev.cards[0].value === next.cards[0].value &&
-    prev.cards[0].faceUp === next.cards[0].faceUp
+    prev.cards[0].faceUp === next.cards[0].faceUp &&
+    prev.selected === next.selected
   ) {
     return true;
   }
