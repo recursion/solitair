@@ -113,6 +113,16 @@ export const dealStockCards = state => {
   };
 };
 
+const getCardIndex = (card, pile) => {
+  let cardIndex = -1;
+  pile.forEach((c, i) => {
+    if (c.value === card.value && c.suit === card.suit) {
+      cardIndex = i;
+    }
+  });
+  return cardIndex;
+};
+
 // TODO: change to moveToFoundation AND
 // check for valid move
 // (if no cards, card must be ace
@@ -144,12 +154,7 @@ export const moveToFoundation = (state, selected, foundationIndex) => {
   }
 
   // remove card from its tableau
-  let cardIndex;
-  nextTableau.forEach((c, i) => {
-    if (c.value === card.value && c.suit === card.suit) {
-      cardIndex = i;
-    }
-  });
+  let cardIndex = getCardIndex(card, nextTableau);
   const [removed] = nextTableau.splice(cardIndex, 1);
 
   // turn the top card face up
@@ -178,14 +183,9 @@ const tableauSwap = (state, indexFrom, indexTo, card) => {
   const tableauFrom = state.tableaus[indexFrom].slice();
   const tableauTo = state.tableaus[indexTo].slice();
   let nextTableaus = state.tableaus.slice();
-  let toCardIndex;
 
   // remove the card from existing pile
-  tableauFrom.forEach((c, i) => {
-    if (c.value === card.value && c.suit === card.suit) {
-      toCardIndex = i;
-    }
-  });
+  const toCardIndex = getCardIndex(card, tableauFrom);
   const removedCards = tableauFrom.splice(0, toCardIndex + 1);
 
   // turn the top card face up
