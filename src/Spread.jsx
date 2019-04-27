@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import Card from "./Card";
 
-const stackOffset = 35;
+const stackOffset = 150;
 
 let uid = 0;
 const getUID = () => uid++;
@@ -29,23 +29,21 @@ const areEqual = (prev, next) => {
 // represents a pile of cards
 // cards will be stacked on top of each other
 const Spread = ({ cards, cardClickHandler, pileClickHandler, selected }) =>
-  cards[0] && cards[0].faceUp ? (
-    cards
-      .filter(c => c.faceUp)
-      .map((card, i) => (
-        <div
-          className="w-32 h-48 relative"
-          onClick={cards.length === 0 ? pileClickHandler : () => {}}
-        >
-          <Card
-            card={card}
-            clickHandler={cardClickHandler}
-            offset={{ left: `${-(i * 150)}px` }}
-            key={getUID()}
-            selected={selected}
-          />
-        </div>
-      ))
+  cards.length !== 0 ? (
+    cards.map((card, i) => (
+      <div
+        className="w-32 h-48 relative"
+        onClick={cards.length === 0 ? pileClickHandler : () => {}}
+        key={getUID()}
+      >
+        <Card
+          card={card}
+          clickHandler={i === cards.length - 1 ? cardClickHandler : () => {}}
+          offset={{ left: `${-(i * stackOffset)}px` }}
+          selected={selected}
+        />
+      </div>
+    ))
   ) : (
     <div />
   );
