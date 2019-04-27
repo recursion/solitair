@@ -3,7 +3,7 @@ import { images } from "./images.js";
 
 const addSelectedClass = (card, selected) =>
   selected && (card.value === selected.value && card.suit === selected.suit)
-    ? `border-4 border-blue rounded`
+    ? `border-4 border-blue rounded-lg`
     : "";
 
 // represents a card
