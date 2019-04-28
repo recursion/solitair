@@ -2,19 +2,15 @@ import React, { useReducer } from "react";
 import WinModal from "./WinModal";
 import Pile from "./Pile";
 import Spread from "./Spread";
-import * as Solitaire from "./solitaire";
-
-const initialGameState = {
-  selected: { card: null, pileType: null, pileIndex: null },
-  game: Solitaire.initialState
-};
-
-const init = state => {
-  return {
-    selected: initialGameState.selected,
-    game: Solitaire.init(state.game)
-  };
-};
+import {
+  reducer,
+  initialState,
+  init,
+  dispatchDeal,
+  dispatchReset,
+  dispatchSelect,
+  dispatchSelectEmpty
+} from "./tableReducer";
 
 // generate UIDs for component keys
 // TODO: something better
@@ -23,116 +19,15 @@ const getUID = () => {
   return uid++;
 };
 
-// we have selected a new card for movement
-const selectNew = (state, action) => {
-  const nextSelected = {
-    ...state.selected,
-    card: action.card,
-    pileType: action.pileType,
-    pileIndex: action.pileIndex
-  };
-
-  return {
-    ...state,
-    selected: nextSelected
-  };
-};
-
-// we already have a card selected, and now have clicked on the location we want to place it
-// determine if the move is legal and move it, or fail.
-const moveCard = (state, action) => {
-  // TODO: handle moving from a foundation
-  let nextGameState;
-  if (action.pileType === "FOUNDATION") {
-    nextGameState = Solitaire.moveToFoundation(
-      state.game,
-      state.selected,
-      action.pileIndex
-    );
-  } else if (action.pileType === "TABLEAU") {
-    nextGameState = Solitaire.moveToTableau(
-      state.game,
-      state.selected,
-      action.pileIndex
-    );
-  } else {
-    // pileType is STOCK or something else we cant move to
-    return {
-      ...state,
-      selected: initialGameState.selected
-    };
-  }
-  return {
-    ...state,
-    game: nextGameState,
-    selected: initialGameState.selected
-  };
-};
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case "RESET":
-      return init(initialGameState);
-
-    case "DEAL":
-      const nextGameState = Solitaire.dealStockCards(state.game);
-      return {
-        ...state,
-        game: nextGameState,
-        selected: initialGameState.selected
-      };
-
-    case "SELECT":
-      if (state.selected.card) {
-        return moveCard(state, action);
-      } else if (!state.selected.card) {
-        return selectNew(state, action);
-      } else {
-        return { ...state, selected: initialGameState.selected };
-      }
-
-    case "MOVE":
-      if (state.selected.card) {
-        return moveCard(state, action);
-      }
-      return state;
-
-    default:
-      return state;
-  }
-};
-
-const dispatchSelect = (dispatch, card, pileType, pileIndex) => {
-  return dispatch({
-    type: "SELECT",
-    pileType,
-    pileIndex,
-    card
-  });
-};
-
-const dispatchSelectEmpty = (dispatch, pileIndex, pileType) => {
-  dispatch({ type: "MOVE", pileIndex, pileType });
-};
-
-const dispatchDeal = dispatch => {
-  dispatch({ type: "DEAL" });
-};
-
-const dispatchReset = dispatch => {
-  dispatch({ type: "RESET" });
-};
-
 // represents the solitaire table
 // a table has:
 // a stock (the "hand")
-// 4 foundation piles
-// 7 tableau piles
-// a waste pile
+// a waste pile (currently used to display visible cards from the stock)
+// 4 foundation piles (where you build the finished suit stacks from aces)
+// 7 tableau piles (the working piles) - currently allowed to stack any sequenced cards
+// will eventually be a rule set for allowing only alternating colors to stack on tableaus
 const Table = () => {
-  const [state, dispatch] = useReducer(reducer, initialGameState, init);
-  // TODO: Display winner and offer restart
-
+  const [state, dispatch] = useReducer(reducer, initialState, init);
   return (
     <>
       <div className="bg-green-light w-screen h-screen flex flex-col items-stretch justify-start p-2">
