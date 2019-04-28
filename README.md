@@ -1,20 +1,23 @@
 ## react-tailwind-starter
 
 A basic solitaire clone.
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), and has [tailwindcss](https://tailwindcss.com) wired up.
 
-- Todo
-- [x] Implement using the stock
+### Todo
+
 - [ ] Add ruleset for only allowing alternating colors on tableaus
-- [x] Fix stock visible pile rendering when # of cards changes.
+- [ ] Add config menu to allow for switching rulesets
+- [ ] Add reset / config button somewhere
 - [ ] Implement drag and drop
+- [ ] Keep score across multiple games
+- [x] Implement using the stock
+- [x] Fix stock visible pile rendering when # of cards changes.
 - [x] Implement win condition - At least partially implemented
-- [ ] Display win condition
+- [x] Display win condition
 - [x] Fix piles re-rendering on every state change
       -- Had some odd issues where this seemed like it wasnt working
       -- but appears to be ok in chrome and firefox now.
       -- will continue to watch.
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), and has [tailwindcss](https://tailwindcss.com) wired up.
 
 ## Available Scripts
 
