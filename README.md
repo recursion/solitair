@@ -5,7 +5,7 @@ A basic solitaire clone.
 - Todo
 - [x] Implement using the stock
 - [ ] Add ruleset for only allowing alternating colors on tableaus
-- [ ] Fix stock visible pile rendering when # of cards changes.
+- [x] Fix stock visible pile rendering when # of cards changes.
 - [ ] Implement drag and drop
 - [x] Implement win condition - At least partially implemented
 - [ ] Display win condition

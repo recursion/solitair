@@ -123,11 +123,12 @@ const dispatchDeal = dispatch => {
 // a waste pile
 const Table = () => {
   const [state, dispatch] = useReducer(reducer, initialGameState, init);
+  // TODO: Display winner and offer restart
 
   return (
     <div className="bg-green-light w-screen h-screen flex flex-col items-stretch justify-start p-2">
       <div className="flex flex-row justify-end">
-        <div className="flex-grow">
+        <div className="">
           <Pile
             cards={state.game.stock}
             selected={state.selected.card}
@@ -137,7 +138,7 @@ const Table = () => {
             }}
           />
         </div>
-        <div className="flex-grow flex flex-row justify-around">
+        <div className="flex flex-row justify-around ml-20">
           <Spread
             cards={state.game.waste}
             selected={state.selected.card}
@@ -147,7 +148,7 @@ const Table = () => {
           />
         </div>
         <div className="flex-grow" />
-        <div className="flex-grow flex flex-row justify-around">
+        <div className="w-2/5 flex flex-row justify-around">
           {state.game.foundations.map((f, i) => (
             <Pile
               cards={state.game.foundations[i]}

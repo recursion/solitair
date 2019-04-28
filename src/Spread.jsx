@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import Card from "./Card";
 
-const stackOffset = 150;
+const stackOffset = 75;
 
 let uid = 0;
 const getUID = () => uid++;
