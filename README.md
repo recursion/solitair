@@ -7,9 +7,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 - [ ] Add ruleset for only allowing alternating colors on tableaus
 - [ ] Add config menu to allow for switching rulesets
-- [ ] Add reset / config button somewhere
 - [ ] Implement drag and drop
 - [ ] Keep score across multiple games
+- [x] Add reset / config button somewhere - partially done (reset) - may also want config menu here
+- [x] Fix Reset - ~~For some reason the deck initializes correctly the first deal - but on a reset the deck is completely broken - I cannot find a reason for this - it almost appears as if some values are being cached or something...~~ This may have just been a misunderstanding on my part about how the react reducer hook uses initialstate, but it seems that the values were being memoized or something.... I had to set initialState to functions to get it to calculate new values.
 - [x] Implement using the stock
 - [x] Fix stock visible pile rendering when # of cards changes.
 - [x] Implement win condition - At least partially implemented
