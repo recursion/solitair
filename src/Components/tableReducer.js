@@ -1,14 +1,9 @@
 import * as Solitaire from "../solitaire";
 
-export const initialState = {
-  selected: { card: null, pileType: null, pileIndex: null },
-  game: Solitaire.initialState
-};
-
-export const init = state => {
+export const initialState = () => {
   return {
-    selected: initialState.selected,
-    game: Solitaire.init(state.game)
+    selected: { card: null, pileType: null, pileIndex: null },
+    game: Solitaire.init(Solitaire.initialState())
   };
 };
 
@@ -48,27 +43,27 @@ const moveCard = (state, action) => {
     // pileType is STOCK or something else we cant move to
     return {
       ...state,
-      selected: initialState.selected
+      selected: initialState().selected
     };
   }
   return {
     ...state,
     game: nextGameState,
-    selected: initialState.selected
+    selected: initialState().selected
   };
 };
 
 export const reducer = (state, action) => {
   switch (action.type) {
     case "RESET":
-      return init(initialState);
+      return initialState();
 
     case "DEAL":
       const nextGameState = Solitaire.dealStockCards(state.game);
       return {
         ...state,
         game: nextGameState,
-        selected: initialState.selected
+        selected: initialState().selected
       };
 
     case "SELECT":
@@ -77,7 +72,7 @@ export const reducer = (state, action) => {
       } else if (!state.selected.card) {
         return selectNew(state, action);
       } else {
-        return { ...state, selected: initialState.selected };
+        return { ...state, selected: initialState().selected };
       }
 
     case "MOVE":

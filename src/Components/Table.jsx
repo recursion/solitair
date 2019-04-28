@@ -5,7 +5,6 @@ import Spread from "./Spread";
 import {
   reducer,
   initialState,
-  init,
   dispatchDeal,
   dispatchReset,
   dispatchSelect,
@@ -27,7 +26,7 @@ const getUID = () => {
 // 7 tableau piles (the working piles) - currently allowed to stack any sequenced cards
 // will eventually be a rule set for allowing only alternating colors to stack on tableaus
 const Table = () => {
-  const [state, dispatch] = useReducer(reducer, initialState, init);
+  const [state, dispatch] = useReducer(reducer, initialState());
   return (
     <>
       <div className="bg-green-light w-screen h-screen flex flex-col items-stretch justify-start p-2">
@@ -85,6 +84,12 @@ const Table = () => {
             />
           ))}
         </div>
+        <button
+          className="fixed pin-r pin-b bg-white border border-black rounded m-3 p-3"
+          onClick={() => dispatchReset(dispatch)}
+        >
+          Deal New
+        </button>
       </div>
       {state.game.winner && <WinModal reset={() => dispatchReset(dispatch)} />}
     </>

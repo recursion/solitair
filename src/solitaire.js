@@ -18,16 +18,18 @@ const cards = [
   "K"
 ];
 
-export const initialState = {
-  stock: [],
-  foundations: [[], [], [], []],
-  tableaus: [[], [], [], [], [], [], []],
-  waste: [],
-  winner: false
+export const initialState = () => {
+  return {
+    stock: [],
+    foundations: [[], [], [], []],
+    tableaus: [[], [], [], [], [], [], []],
+    waste: [],
+    winner: false
+  };
 };
 
 export const init = state => {
-  const nextState = initialState;
+  const nextState = initialState();
   let cards = shuffle(Deck());
 
   for (let i = 0; i < nextState.tableaus.length; i++) {
