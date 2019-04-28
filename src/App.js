@@ -1,8 +1,5 @@
 import React from "react";
-import Table from "./Table";
-import * as cards from "./solitaire";
-
-window.cards = cards;
+import Table from "./Components/Table";
 
 function App() {
   return <Table />;

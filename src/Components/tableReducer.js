@@ -1,4 +1,4 @@
-import * as Solitaire from "./solitaire";
+import * as Solitaire from "../solitaire";
 
 export const initialState = {
   selected: { card: null, pileType: null, pileIndex: null },

@@ -1,5 +1,5 @@
 import React from "react";
-import { images } from "./images.js";
+import { images } from "../images";
 
 const addSelectedClass = (card, selected) =>
   selected && (card.value === selected.value && card.suit === selected.suit)
