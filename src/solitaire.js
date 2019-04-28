@@ -207,7 +207,7 @@ const validFoundationMove = (foundationTarget, card) => {
   // verify card is -1 value from card at top of foundation
   return (
     foundationHead &&
-    (currentCardIndexMinus === foundationHeadIndex ||
+    (currentCardIndexMinus === foundationHeadIndex &&
       card.suit === foundationHead.suit)
   );
 };
