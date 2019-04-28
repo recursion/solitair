@@ -27,7 +27,7 @@ export const initialState = {
 };
 
 export const init = state => {
-  const nextState = { ...state };
+  const nextState = initialState;
   let cards = shuffle(Deck());
 
   for (let i = 0; i < nextState.tableaus.length; i++) {
