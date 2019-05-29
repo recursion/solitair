@@ -1,6 +1,9 @@
 ## react-tailwind-starter
 
 A basic solitaire clone.
+Demo available at https://js-solitaire.surge.sh
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app), and has [tailwindcss](https://tailwindcss.com) wired up.
 
 ### Todo
