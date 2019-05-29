@@ -1,6 +1,6 @@
-## react-tailwind-starter
+## Solitaire
 
-A basic solitaire clone.
+A very basic solitaire clone.
 Demo available at https://js-solitaire.surge.sh
 
 
